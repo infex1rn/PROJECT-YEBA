@@ -21,17 +21,20 @@ export function Header() {
           </Link>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link href="/" className="text-foreground hover:text-primary transition-colors">
-              Home
-            </Link>
-            <Link href="/about" className="text-foreground hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link href="/contact" className="text-foreground hover:text-primary transition-colors">
-              Contact
-            </Link>
-          </div>
+            <div className="hidden md:flex items-center space-x-6">
+              <Link href="/" className="text-foreground hover:text-primary transition-colors">
+                Home
+              </Link>
+              <Link href="/marketplace" className="text-foreground hover:text-primary transition-colors">
+                Marketplace
+              </Link>
+              <Link href="/about" className="text-foreground hover:text-primary transition-colors">
+                About
+              </Link>
+              <Link href="/contact" className="text-foreground hover:text-primary transition-colors">
+                Contact
+              </Link>
+            </div>
 
           <div className="flex items-center space-x-2">
             <Link href="/admin/login">

@@ -3,6 +3,7 @@ import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Star } from "lucide-react"
+import Link from "next/link"
 
 export default function HomePage() {
   return (
@@ -19,9 +20,12 @@ export default function HomePage() {
               Browse high-quality designs from top creators and bring your ideas to life.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/marketplace">
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg">
                 Explore Designs
               </Button>
+            </Link>
+            <Link href="/designer-signup">
               <Button
                 size="lg"
                 variant="outline"
@@ -29,7 +33,8 @@ export default function HomePage() {
               >
                 Become a Designer
               </Button>
-            </div>
+            </Link>
+          </div>
           </div>
         </section>
 
