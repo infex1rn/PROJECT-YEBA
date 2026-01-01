@@ -6,7 +6,11 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "cf:deploy": "wrangler pages deploy out --project-name=deepfold-marketplace",
+    "cf:dev": "wrangler pages dev out --port=3000",
+    "cf:build": "next build && pnpm cf:deploy",
+    "preview": "next build && next start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

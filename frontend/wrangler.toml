@@ -1,0 +1,23 @@
+# Cloudflare Pages configuration for DeepFold Design Marketplace
+name = "deepfold-marketplace"
+compatibility_date = "2024-01-01"
+
+# Pages configuration
+pages_build_output_dir = ".vercel/output/static"
+
+# Environment variables
+[env.production]
+vars = { NODE_ENV = "production" }
+
+[env.preview]
+vars = { NODE_ENV = "preview" }
+
+# Build configuration
+[build]
+command = "pnpm run build"
+cwd = "."
+
+# Custom build configuration for Next.js on Cloudflare
+[build.environment]
+NODE_VERSION = "20"
+SKIP_DEPENDENCY_INSTALL = "false"
