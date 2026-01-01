@@ -1,0 +1,177 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  passwordHash String        @map("password_hash")
+  role         Role
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  
+  designer         Designer?
+  buyer            Buyer?
+  sentMessages     Message[]     @relation("SentMessages")
+  receivedMessages Message[]     @relation("ReceivedMessages")
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Designer {
+  id            Int          @id @default(autoincrement())
+  userId        Int          @unique @map("user_id")
+  bio           String?
+  portfolioLink String?      @map("portfolio_link")
+  rating        Float        @default(0.0)
+  earnings      Float        @default(0.0)
+  
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  designs     Design[]
+  reviews     Review[]
+  withdrawals Withdrawal[]
+
+  @@map("designers")
+}
+
+model Buyer {
+  id        Int    @id @default(autoincrement())
+  userId    Int    @unique @map("user_id")
+  extraInfo Json?  @map("extra_info")
+  
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  reviews      Review[]
+
+  @@map("buyers")
+}
+
+model Design {
+  id                    Int          @id @default(autoincrement())
+  designerId            Int          @map("designer_id")
+  title                 String
+  description           String?
+  category              String
+  price                 Float
+  fileUrl               String       @map("file_url")
+  watermarkedPreviewUrl String       @map("watermarked_preview_url")
+  status                DesignStatus @default(PENDING)
+  createdAt             DateTime     @default(now()) @map("created_at")
+  
+  designer     Designer      @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([designerId])
+  @@index([category])
+  @@index([price])
+  @@index([createdAt(sort: Desc)])
+  @@map("designs")
+}
+
+model Transaction {
+  id            Int           @id @default(autoincrement())
+  buyerId       Int           @map("buyer_id")
+  designId      Int           @map("design_id")
+  amount        Float
+  paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
+  paymentMethod PaymentMethod @map("payment_method")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  
+  buyer  Buyer  @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  design Design @relation(fields: [designId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, designId])
+  @@index([buyerId])
+  @@index([designId])
+  @@index([paymentStatus])
+  @@index([createdAt(sort: Desc)])
+  @@map("transactions")
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  buyerId    Int      @map("buyer_id")
+  designerId Int      @map("designer_id")
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  buyer    Buyer    @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  designer Designer @relation(fields: [designerId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, designerId])
+  @@index([designerId])
+  @@map("reviews")
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  senderId   Int      @map("sender_id")
+  receiverId Int      @map("receiver_id")
+  message    String
+  timestamp  DateTime @default(now())
+  
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, receiverId])
+  @@index([timestamp(sort: Desc)])
+  @@map("messages")
+}
+
+model Withdrawal {
+  id         Int              @id @default(autoincrement())
+  designerId Int              @map("designer_id")
+  amount     Float
+  status     WithdrawalStatus @default(PENDING)
+  createdAt  DateTime         @default(now()) @map("created_at")
+  
+  designer Designer @relation(fields: [designerId], references: [id], onDelete: Cascade)
+
+  @@index([designerId])
+  @@index([status])
+  @@map("withdrawals")
+}
+
+enum Role {
+  BUYER
+  DESIGNER
+  ADMIN
+}
+
+enum DesignStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FLAGGED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum PaymentMethod {
+  STRIPE
+  PAYPAL
+  PAYSTACK
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
