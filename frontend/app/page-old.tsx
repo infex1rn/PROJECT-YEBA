@@ -3,6 +3,8 @@ import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Star } from "lucide-react"
+import { FaPalette, FaTshirt, FaMobileAlt, FaCreditCard } from "react-icons/fa"
+import { BsImageFill } from "react-icons/bs"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -43,19 +45,24 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold text-center text-foreground mb-12">Browse by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {[
-                { name: "Logos", icon: "🎨" },
-                { name: "Posters", icon: "🖼️" },
-                { name: "T-Shirts", icon: "👕" },
-                { name: "Social Media", icon: "📱" },
-                { name: "Business Cards", icon: "💳" },
-              ].map((category) => (
-                <Card key={category.name} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardContent className="p-6 text-center">
-                    <div className="text-4xl mb-3">{category.icon}</div>
-                    <h3 className="font-semibold text-foreground">{category.name}</h3>
-                  </CardContent>
-                </Card>
-              ))}
+                { name: "Logos", icon: FaPalette },
+                { name: "Posters", icon: BsImageFill },
+                { name: "T-Shirts", icon: FaTshirt },
+                { name: "Social Media", icon: FaMobileAlt },
+                { name: "Business Cards", icon: FaCreditCard },
+              ].map((category) => {
+                const IconComponent = category.icon
+                return (
+                  <Card key={category.name} className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-4xl mb-3 flex justify-center items-center">
+                        <IconComponent className="w-10 h-10" />
+                      </div>
+                      <h3 className="font-semibold text-foreground">{category.name}</h3>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </div>
         </section>

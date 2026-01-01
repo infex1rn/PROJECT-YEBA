@@ -7,6 +7,8 @@ import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Star, Sparkles, Zap, TrendingUp } from "lucide-react"
+import { FaPalette, FaTshirt, FaMobileAlt, FaCreditCard } from "react-icons/fa"
+import { BsImageFill } from "react-icons/bs"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -99,7 +101,7 @@ export default function HomePage() {
           >
             <motion.div variants={itemVariants}>
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 backdrop-blur-sm border border-primary/20 mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 mb-6 liquid-shine"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -150,7 +152,7 @@ export default function HomePage() {
                 >
                   <Button 
                     size="lg" 
-                    className="relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg shadow-lg shadow-primary/20"
+                    className="relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg depth-shadow-lg liquid-shine"
                   >
                     <motion.span
                       className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -179,7 +181,7 @@ export default function HomePage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-2 border-primary text-primary hover:bg-primary/10 px-8 py-6 text-lg bg-transparent backdrop-blur-sm"
+                    className="glass-button border-2 border-primary text-primary hover:bg-primary/10 px-8 py-6 text-lg"
                   >
                     <span className="flex items-center gap-2">
                       Become a Designer
@@ -239,12 +241,14 @@ export default function HomePage() {
               variants={containerVariants}
             >
               {[
-                { name: "Logos", icon: "🎨", color: "from-blue-500 to-cyan-500" },
-                { name: "Posters", icon: "🖼️", color: "from-purple-500 to-pink-500" },
-                { name: "T-Shirts", icon: "👕", color: "from-green-500 to-emerald-500" },
-                { name: "Social Media", icon: "📱", color: "from-orange-500 to-red-500" },
-                { name: "Business Cards", icon: "💳", color: "from-indigo-500 to-blue-500" },
-              ].map((category) => (
+                { name: "Logos", icon: FaPalette, color: "from-blue-500 to-cyan-500" },
+                { name: "Posters", icon: BsImageFill, color: "from-purple-500 to-pink-500" },
+                { name: "T-Shirts", icon: FaTshirt, color: "from-green-500 to-emerald-500" },
+                { name: "Social Media", icon: FaMobileAlt, color: "from-orange-500 to-red-500" },
+                { name: "Business Cards", icon: FaCreditCard, color: "from-indigo-500 to-blue-500" },
+              ].map((category) => {
+                const IconComponent = category.icon
+                return (
                 <motion.div
                   key={category.name}
                   variants={cardVariants}
@@ -252,21 +256,21 @@ export default function HomePage() {
                   className="perspective-1000"
                 >
                   <Link href={`/marketplace?category=${category.name}`}>
-                    <Card className="cursor-pointer transform-gpu h-full border-2 hover:border-primary/50 transition-colors">
+                    <Card className="glass-card cursor-pointer transform-gpu h-full border-2 hover:border-primary/50 transform-3d">
                       <CardContent className="p-8 text-center">
                         <motion.div
-                          className={`text-5xl mb-4 p-4 rounded-2xl bg-gradient-to-br ${category.color} inline-block shadow-lg`}
+                          className={`text-5xl mb-4 p-4 rounded-2xl bg-gradient-to-br ${category.color} inline-block depth-shadow-lg flex items-center justify-center`}
                           whileHover={{ rotate: [0, -10, 10, -10, 0] }}
                           transition={{ duration: 0.5 }}
                         >
-                          {category.icon}
+                          <IconComponent className="w-10 h-10 text-white" />
                         </motion.div>
                         <h3 className="font-semibold text-lg text-foreground">{category.name}</h3>
                       </CardContent>
                     </Card>
                   </Link>
                 </motion.div>
-              ))}
+              )})}
             </motion.div>
           </div>
         </section>
@@ -303,7 +307,7 @@ export default function HomePage() {
                   whileHover="hover"
                   className="perspective-1000"
                 >
-                  <Card className="overflow-hidden border-2 hover:border-primary/50 transition-colors h-full">
+                  <Card className="glass-card overflow-hidden border-2 hover:border-primary/50 h-full transform-3d">
                     <div className="aspect-[4/3] bg-gradient-to-br from-primary/20 to-secondary/20 relative overflow-hidden">
                       <motion.div
                         className="absolute inset-0 bg-gradient-to-br from-primary/40 to-transparent"
@@ -348,7 +352,7 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button size="lg" className="shadow-lg">
+                  <Button size="lg" className="depth-shadow-lg liquid-shine">
                     View All Designs
                   </Button>
                 </motion.div>
@@ -387,10 +391,10 @@ export default function HomePage() {
                   whileHover="hover"
                   className="perspective-1000"
                 >
-                  <Card className="border-2 hover:border-primary/50 transition-colors">
+                  <Card className="glass-card border-2 hover:border-primary/50 transform-3d">
                     <CardContent className="p-6 text-center">
                       <motion.div
-                        className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4"
+                        className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 depth-shadow"
                         whileHover={{ rotate: 360 }}
                         transition={{ duration: 0.6 }}
                       />
@@ -462,7 +466,7 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button size="lg" className="px-12 py-6 text-lg shadow-2xl shadow-primary/30">
+                  <Button size="lg" className="px-12 py-6 text-lg depth-shadow-lg liquid-shine">
                     Get Started Today
                   </Button>
                 </motion.div>

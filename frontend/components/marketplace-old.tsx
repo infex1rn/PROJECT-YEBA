@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, Filter, Heart, Download, Eye, Star, ShoppingCart } from "lucide-react"
+import { FaPalette } from "react-icons/fa"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Sample design data - replace with real data from your API
@@ -306,7 +307,9 @@ export default function MarketplacePage() {
         {/* No Results */}
         {filteredDesigns.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎨</div>
+            <div className="text-6xl mb-4 flex justify-center">
+              <FaPalette className="w-24 h-24 text-muted-foreground" />
+            </div>
             <h3 className="text-xl font-semibold mb-2">No designs found</h3>
             <p className="text-muted-foreground mb-4">
               Try adjusting your search or filter criteria
