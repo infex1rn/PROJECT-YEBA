@@ -3,7 +3,8 @@ import { FaLayerGroup, FaTwitter, FaGithub, FaLinkedin, FaInstagram } from "reac
 import { Mail, MapPin, Phone } from "lucide-react"
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
+  // Use fixed year to avoid hydration mismatches
+  const currentYear = 2025
 
   return (
     <footer className="glass border-t border-border/40 mt-auto">

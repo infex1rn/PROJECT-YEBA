@@ -13,6 +13,17 @@ import { FaPalette, FaTshirt, FaMobileAlt, FaCreditCard } from "react-icons/fa"
 import { BsImageFill } from "react-icons/bs"
 import Link from "next/link"
 
+// Helper function to generate URL-safe slugs
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+}
+
 export default function HomePage() {
   const { scrollYProgress } = useScroll()
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%'])
@@ -284,7 +295,7 @@ export default function HomePage() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <Link href={`/designers/${designer.name.toLowerCase().replaceAll(' ', '-')}`}>
+                  <Link href={`/designers/${generateSlug(designer.name)}`}>
                     <Card className="glass-card group cursor-pointer hover:border-primary/50 transition-all">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
