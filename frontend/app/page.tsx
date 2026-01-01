@@ -118,9 +118,9 @@ export default function HomePage() {
                 <div className="flex flex-wrap justify-center gap-2 mt-4 text-sm text-muted-foreground">
                   <span>Popular:</span>
                   <Link href="/marketplace?q=logo" className="hover:text-foreground transition-colors">Logo Templates</Link>
-                  <span>•</span>
+                  <span aria-hidden="true">•</span>
                   <Link href="/marketplace?q=ui" className="hover:text-foreground transition-colors">UI Kits</Link>
-                  <span>•</span>
+                  <span aria-hidden="true">•</span>
                   <Link href="/marketplace?q=mockup" className="hover:text-foreground transition-colors">Mockups</Link>
                 </div>
               </motion.div>
@@ -224,7 +224,7 @@ export default function HomePage() {
                       </div>
 
                       <CardContent className="p-4">
-                        <h3 className="font-semibold text-base mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-base mb-2 truncate group-hover:text-primary transition-colors">
                           {design.title}
                         </h3>
                         
@@ -284,11 +284,15 @@ export default function HomePage() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <Link href={`/designers/${designer.name.toLowerCase().replace(' ', '-')}`}>
+                  <Link href={`/designers/${designer.name.toLowerCase().replaceAll(' ', '-')}`}>
                     <Card className="glass-card group cursor-pointer hover:border-primary/50 transition-all">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
-                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0" />
+                          <div 
+                            className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0" 
+                            role="img"
+                            aria-label={`${designer.name}'s profile picture`}
+                          />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-2">
                               <h3 className="font-semibold text-base group-hover:text-primary transition-colors truncate">
