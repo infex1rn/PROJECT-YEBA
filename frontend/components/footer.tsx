@@ -22,16 +22,16 @@ export function Footer() {
               Your premier marketplace for high-quality design assets. Empowering creators worldwide.
             </p>
             <div className="flex space-x-3">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg glass-button flex items-center justify-center hover:text-primary transition-colors">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our Twitter page" className="w-9 h-9 rounded-lg glass-button flex items-center justify-center hover:text-primary transition-colors">
                 <FaTwitter className="h-4 w-4" />
               </a>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg glass-button flex items-center justify-center hover:text-primary transition-colors">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our GitHub repository" className="w-9 h-9 rounded-lg glass-button flex items-center justify-center hover:text-primary transition-colors">
                 <FaGithub className="h-4 w-4" />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg glass-button flex items-center justify-center hover:text-primary transition-colors">
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our LinkedIn page" className="w-9 h-9 rounded-lg glass-button flex items-center justify-center hover:text-primary transition-colors">
                 <FaLinkedin className="h-4 w-4" />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg glass-button flex items-center justify-center hover:text-primary transition-colors">
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Visit our Instagram profile" className="w-9 h-9 rounded-lg glass-button flex items-center justify-center hover:text-primary transition-colors">
                 <FaInstagram className="h-4 w-4" />
               </a>
             </div>
@@ -113,8 +113,8 @@ export function Footer() {
               </li>
               <li className="flex items-start space-x-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <a href="tel:+1234567890" className="hover:text-primary transition-colors">
-                  +1 (234) 567-890
+                <a href="tel:+12345678900" className="hover:text-primary transition-colors">
+                  +1 (234) 567-8900
                 </a>
               </li>
               <li className="flex items-start space-x-2 text-sm text-muted-foreground">
