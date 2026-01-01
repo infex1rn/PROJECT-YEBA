@@ -29,6 +29,9 @@ export const authenticate = async (
   }
 };
 
+// Alias for authenticate
+export const authenticateToken = authenticate;
+
 export const authorize = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user || !roles.includes(req.user.role)) {
@@ -37,4 +40,13 @@ export const authorize = (...roles: string[]) => {
     }
     next();
   };
+};
+
+// Helper middleware to require admin role
+export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  if (!req.user || req.user.role !== 'ADMIN') {
+    res.status(403).json({ success: false, error: 'Admin access required' });
+    return;
+  }
+  next();
 };

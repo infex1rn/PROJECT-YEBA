@@ -6,6 +6,7 @@ import { config } from './config';
 import authRoutes from './routes/auth';
 import designRoutes from './routes/designs';
 import userRoutes from './routes/users';
+import adminRoutes from './routes/admin';
 
 const app: Express = express();
 
@@ -30,6 +31,7 @@ app.use('/api/', limiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/designs', designRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

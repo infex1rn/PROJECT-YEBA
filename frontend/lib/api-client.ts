@@ -187,7 +187,7 @@ class ApiClient {
 
   // Admin endpoints
   async getDashboardStats() {
-    return this.request('/admin/dashboard/stats');
+    return this.request('/admin/stats');
   }
 
   async getAllUsers(params?: {
@@ -229,10 +229,16 @@ class ApiClient {
     return this.request(`/admin/designs${query ? `?${query}` : ''}`);
   }
 
-  async moderateDesign(designId: number, action: string, notes?: string) {
+  async moderateDesign(designId: number, status: string, reason?: string) {
     return this.request(`/admin/designs/${designId}/moderate`, {
       method: 'PUT',
-      body: JSON.stringify({ action, notes }),
+      body: JSON.stringify({ status, reason }),
+    });
+  }
+
+  async deleteDesign(designId: number) {
+    return this.request(`/admin/designs/${designId}`, {
+      method: 'DELETE',
     });
   }
 
@@ -260,10 +266,23 @@ class ApiClient {
     return this.request(`/admin/withdrawals${query ? `?${query}` : ''}`);
   }
 
-  async updateWithdrawal(withdrawalId: number, action: string, notes?: string) {
-    return this.request(`/admin/withdrawals/${withdrawalId}`, {
+  async processWithdrawal(withdrawalId: number, status: string, reason?: string) {
+    return this.request(`/admin/withdrawals/${withdrawalId}/process`, {
       method: 'PUT',
-      body: JSON.stringify({ action, notes }),
+      body: JSON.stringify({ status, reason }),
+    });
+  }
+
+  async processRefund(transactionId: number, reason?: string) {
+    return this.request(`/admin/transactions/${transactionId}/refund`, {
+      method: 'PUT',
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async deleteUser(userId: number) {
+    return this.request(`/admin/users/${userId}`, {
+      method: 'DELETE',
     });
   }
 
