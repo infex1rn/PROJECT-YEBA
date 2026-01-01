@@ -1,0 +1,7 @@
+{
+  "name": "project-yeba",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "description": "DeepFold Design Marketplace - A platform for buying and selling design templates"
+}

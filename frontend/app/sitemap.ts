@@ -1,6 +1,8 @@
 import { generateSitemap } from '@/lib/seo';
 import { MetadataRoute } from 'next';
 
+export const dynamic = 'force-static';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static routes
   const routes = [
