@@ -1,0 +1,16 @@
+# Cloudflare Pages - Redirects and Rules
+
+# Redirect www to non-www
+https://www.deepfold.com/* https://deepfold.com/:splat 301
+
+# Redirect HTTP to HTTPS (Cloudflare handles this automatically, but explicit rule)
+http://deepfold.com/* https://deepfold.com/:splat 301
+
+# Mobile routing - redirect mobile devices to /m/* routes
+# Note: This is handled by Next.js middleware, but you can add rules here if needed
+
+# SPA fallback for client-side routing
+/*  /index.html  200
+
+# API proxy (if needed to avoid CORS)
+/api/*  https://api.deepfold.com/:splat  200

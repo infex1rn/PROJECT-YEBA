@@ -1,29 +1,83 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, ImageIcon, DollarSign, AlertTriangle, TrendingUp, Clock, CheckCircle } from "lucide-react"
+import { Users, ImageIcon, DollarSign, AlertTriangle, TrendingUp, Clock, CheckCircle, Loader2 } from "lucide-react"
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { apiClient } from "@/lib/api-client"
+import { Button } from "@/components/ui/button"
 
-// Sample data for charts
-const monthlyUsersData = [
-  { month: "Jan", users: 120 },
-  { month: "Feb", users: 150 },
-  { month: "Mar", users: 180 },
-  { month: "Apr", users: 220 },
-  { month: "May", users: 280 },
-  { month: "Jun", users: 320 },
-]
-
-const monthlySalesData = [
-  { month: "Jan", sales: 2400 },
-  { month: "Feb", sales: 3200 },
-  { month: "Mar", sales: 2800 },
-  { month: "Apr", sales: 4100 },
-  { month: "May", sales: 3800 },
-  { month: "Jun", sales: 4500 },
-]
+interface DashboardStats {
+  totalUsers: number
+  totalDesigners: number
+  totalBuyers: number
+  totalDesigns: number
+  approvedDesigns: number
+  pendingDesigns: number
+  rejectedDesigns: number
+  totalRevenue: number
+  totalTransactions: number
+  pendingWithdrawals: {
+    amount: number
+    count: number
+  }
+  monthlyUsers: Array<{ month: string; users: number }>
+  monthlySales: Array<{ month: string; sales: number }>
+}
 
 export default function AdminDashboardPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchDashboardStats()
+  }, [])
+
+  const fetchDashboardStats = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const response = await apiClient.getDashboardStats()
+      
+      if (response.success && response.data?.data) {
+        setStats(response.data.data)
+      } else {
+        setError(response.error || 'Failed to load dashboard stats')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load dashboard stats')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <AlertTriangle className="h-12 w-12 mx-auto text-destructive" />
+          <p className="text-muted-foreground">{error}</p>
+          <Button onClick={fetchDashboardStats}>Retry</Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!stats) return null
+
   return (
     <div className="space-y-6">
       <div>
@@ -39,8 +93,10 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
+            <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.totalDesigners} designers, {stats.totalBuyers} buyers
+            </p>
           </CardContent>
         </Card>
 
@@ -50,8 +106,10 @@ export default function AdminDashboardPage() {
             <ImageIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5,678</div>
-            <p className="text-xs text-muted-foreground">+8% from last month</p>
+            <div className="text-2xl font-bold">{stats.totalDesigns.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.approvedDesigns} approved, {stats.pendingDesigns} pending
+            </p>
           </CardContent>
         </Card>
 
@@ -61,8 +119,8 @@ export default function AdminDashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231</div>
-            <p className="text-xs text-muted-foreground">+15% from last month</p>
+            <div className="text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">{stats.totalTransactions} transactions</p>
           </CardContent>
         </Card>
 
@@ -72,8 +130,8 @@ export default function AdminDashboardPage() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$8,450</div>
-            <p className="text-xs text-muted-foreground">12 requests pending</p>
+            <div className="text-2xl font-bold">${stats.pendingWithdrawals.amount.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">{stats.pendingWithdrawals.count} requests pending</p>
           </CardContent>
         </Card>
       </div>
@@ -86,7 +144,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlyUsersData}>
+              <LineChart data={stats.monthlyUsers}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -110,7 +168,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlySalesData}>
+              <BarChart data={stats.monthlySales}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -133,19 +191,8 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-start space-x-3 p-3 bg-destructive/5 rounded-lg border border-destructive/20">
-                <div className="w-2 h-2 bg-destructive rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Copyright violation reported</p>
-                  <p className="text-xs text-muted-foreground">Design ID: #1234 - 5 min ago</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3 p-3 bg-destructive/5 rounded-lg border border-destructive/20">
-                <div className="w-2 h-2 bg-destructive rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Inappropriate content flagged</p>
-                  <p className="text-xs text-muted-foreground">User: @designer123 - 15 min ago</p>
-                </div>
+              <div className="text-center py-6 text-muted-foreground text-sm">
+                No pending reports
               </div>
             </div>
           </CardContent>
@@ -155,26 +202,25 @@ export default function AdminDashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ImageIcon className="h-4 w-4 text-primary" />
-              Flagged Designs
+              Pending Designs
             </CardTitle>
-            <CardDescription>Designs pending moderation review</CardDescription>
+            <CardDescription>Designs awaiting moderation</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-start space-x-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
-                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Logo design under review</p>
-                  <p className="text-xs text-muted-foreground">Flagged for similarity - 1 hour ago</p>
+              {stats.pendingDesigns > 0 ? (
+                <div className="flex items-start space-x-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{stats.pendingDesigns} designs pending</p>
+                    <p className="text-xs text-muted-foreground">Review required</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start space-x-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
-                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Poster design reported</p>
-                  <p className="text-xs text-muted-foreground">Quality concerns - 2 hours ago</p>
+              ) : (
+                <div className="text-center py-6 text-muted-foreground text-sm">
+                  No pending designs
                 </div>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -191,19 +237,12 @@ export default function AdminDashboardPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-secondary/5 rounded-lg border border-secondary/20">
                 <div className="flex items-center space-x-3">
-                  <CheckCircle className="h-4 w-4 text-secondary" />
-                  <div>
-                    <p className="text-sm font-medium">Designer verification</p>
-                    <p className="text-xs text-muted-foreground">3 applications pending</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-secondary/5 rounded-lg border border-secondary/20">
-                <div className="flex items-center space-x-3">
                   <TrendingUp className="h-4 w-4 text-secondary" />
                   <div>
                     <p className="text-sm font-medium">Withdrawal requests</p>
-                    <p className="text-xs text-muted-foreground">8 requests totaling $8,450</p>
+                    <p className="text-xs text-muted-foreground">
+                      {stats.pendingWithdrawals.count} requests totaling ${stats.pendingWithdrawals.amount.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
