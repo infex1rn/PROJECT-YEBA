@@ -1,88 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, Filter, Heart, Download, Eye, Star, ShoppingCart } from "lucide-react"
+import { Search, Filter, Heart, Download, Eye, Star, ShoppingCart, Loader2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-// Sample design data - replace with real data from your API
-const sampleDesigns = [
-  {
-    id: 1,
-    title: "Modern Logo Collection",
-    designer: "Sarah Johnson",
-    rating: 4.8,
-    price: 25,
-    category: "Logos",
-    downloads: 156,
-    preview_url: "/api/placeholder/300/200",
-    tags: ["modern", "minimalist", "logo"],
-    featured: true
-  },
-  {
-    id: 2,
-    title: "Social Media Templates",
-    designer: "Mike Chen",
-    rating: 4.6,
-    price: 18,
-    category: "Templates",
-    downloads: 89,
-    preview_url: "/api/placeholder/300/200",
-    tags: ["social", "instagram", "templates"],
-    featured: false
-  },
-  {
-    id: 3,
-    title: "Business Card Designs",
-    designer: "Emma Davis",
-    rating: 4.9,
-    price: 12,
-    category: "Print",
-    downloads: 203,
-    preview_url: "/api/placeholder/300/200",
-    tags: ["business", "professional", "cards"],
-    featured: true
-  },
-  {
-    id: 4,
-    title: "Web UI Kit",
-    designer: "Alex Rodriguez",
-    rating: 4.7,
-    price: 45,
-    category: "UI/UX",
-    downloads: 67,
-    preview_url: "/api/placeholder/300/200",
-    tags: ["ui", "web", "components"],
-    featured: false
-  },
-  {
-    id: 5,
-    title: "Poster Templates",
-    designer: "Lisa Park",
-    rating: 4.5,
-    price: 22,
-    category: "Print",
-    downloads: 134,
-    preview_url: "/api/placeholder/300/200",
-    tags: ["poster", "event", "marketing"],
-    featured: false
-  },
-  {
-    id: 6,
-    title: "Icon Pack - 200 Icons",
-    designer: "David Kim",
-    rating: 4.8,
-    price: 30,
-    category: "Icons",
-    downloads: 298,
-    preview_url: "/api/placeholder/300/200",
-    tags: ["icons", "vector", "pack"],
-    featured: true
-  }
-]
+import { apiClient } from "@/lib/api-client"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const categories = ["All", "Logos", "Templates", "Print", "UI/UX", "Icons", "Illustrations"]
 const sortOptions = [
@@ -93,106 +19,125 @@ const sortOptions = [
   { value: "rating", label: "Highest Rated" }
 ]
 
+interface Design {
+  id: number;
+  title: string;
+  description?: string;
+  category: string;
+  price: number;
+  watermarkedPreviewUrl: string;
+  designer: {
+    id: number;
+    name: string;
+    rating: number;
+  };
+  createdAt: string;
+}
+
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+}
+
 export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
-  const [sortBy, setSortBy] = useState("popular")
+  const [sortBy, setSortBy] = useState("newest")
   const [favoriteIds, setFavoriteIds] = useState(new Set())
   const [cartItems, setCartItems] = useState(new Set())
+  
+  // API state
+  const [designs, setDesigns] = useState<Design[]>([])
+  const [pagination, setPagination] = useState<Pagination | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  // Filter and sort designs
-  const filteredDesigns = sampleDesigns
-    .filter(design => {
-      const matchesSearch = design.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           design.designer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           design.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      const matchesCategory = selectedCategory === "All" || design.category === selectedCategory
-      return matchesSearch && matchesCategory
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "newest":
-          return b.id - a.id
-        case "price-low":
-          return a.price - b.price
-        case "price-high":
-          return b.price - a.price
-        case "rating":
-          return b.rating - a.rating
-        case "popular":
-        default:
-          return b.downloads - a.downloads
+  // Fetch designs from API
+  useEffect(() => {
+    const fetchDesigns = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      const params: any = {
+        page: currentPage,
+        limit: 20,
+        sortBy,
       }
-    })
 
-  const toggleFavorite = (designId) => {
-    setFavoriteIds(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(designId)) {
-        newSet.delete(designId)
+      if (selectedCategory !== "All") {
+        params.category = selectedCategory
+      }
+
+      if (searchQuery.trim()) {
+        params.search = searchQuery
+      }
+
+      const response = await apiClient.getDesigns(params)
+
+      if (response.success && response.data) {
+        setDesigns(response.data.designs || [])
+        setPagination(response.data.pagination)
       } else {
-        newSet.add(designId)
+        setError(response.error || "Failed to load designs")
       }
-      return newSet
-    })
+
+      setIsLoading(false)
+    }
+
+    // Debounce search
+    const timer = setTimeout(() => {
+      fetchDesigns()
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery, selectedCategory, sortBy, currentPage])
+
+  const toggleFavorite = (designId: number) => {
+    const newFavorites = new Set(favoriteIds)
+    if (newFavorites.has(designId)) {
+      newFavorites.delete(designId)
+    } else {
+      newFavorites.add(designId)
+    }
+    setFavoriteIds(newFavorites)
   }
 
   const addToCart = (designId: number) => {
-    setCartItems(prev => new Set([...prev, designId]))
+    const newCart = new Set(cartItems)
+    newCart.add(designId)
+    setCartItems(newCart)
   }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 py-12">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-4">Design Marketplace</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Discover thousands of premium designs from talented creators worldwide
-            </p>
-          </div>
+      {/* Header Section */}
+      <div className="bg-primary/5 py-12 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <h1 className="text-4xl font-bold text-foreground mb-4">Explore Designs</h1>
+          <p className="text-muted-foreground text-lg mb-6">
+            Discover thousands of premium design assets from talented creators
+          </p>
 
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search designs, creators, or tags..."
-              className="pl-10 h-12 text-lg"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        {/* Filters */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-8">
-          {/* Categories */}
-          <div className="flex flex-wrap gap-2">
-            {categories.map(category => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category)}
-                className="whitespace-nowrap"
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-
-          {/* Sort Dropdown */}
-          <div className="lg:ml-auto">
+          {/* Search and Filters */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Search designs, designers, tags..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-12 bg-background"
+              />
+            </div>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
+              <SelectTrigger className="w-full md:w-48 h-12 bg-background">
+                <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                {sortOptions.map(option => (
+                {sortOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -201,139 +146,142 @@ export default function MarketplacePage() {
             </Select>
           </div>
         </div>
+      </div>
 
-        {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-muted-foreground">
-            Showing {filteredDesigns.length} design{filteredDesigns.length !== 1 ? 's' : ''}
-            {searchQuery && ` for "${searchQuery}"`}
-            {selectedCategory !== "All" && ` in ${selectedCategory}`}
-          </p>
-        </div>
-
-        {/* Design Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredDesigns.map(design => (
-            <Card key={design.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
-              <CardHeader className="p-0">
-                {/* Design Preview */}
-                <div className="relative overflow-hidden rounded-t-lg bg-gray-100">
-                  <div className="aspect-[4/3] bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                    <span className="text-gray-500 text-sm">Design Preview</span>
-                  </div>
-                  
-                  {/* Featured Badge */}
-                  {design.featured && (
-                    <Badge className="absolute top-2 left-2 bg-primary">
-                      Featured
-                    </Badge>
-                  )}
-
-                  {/* Overlay Actions */}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-                    <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="secondary" 
-                      className="h-8 w-8 p-0"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggleFavorite(design.id)
-                      }}
-                    >
-                      <Heart className={`h-4 w-4 ${favoriteIds.has(design.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                    </Button>
-                  </div>
-
-                  {/* Download Count */}
-                  <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                    <Download className="h-3 w-3" />
-                    {design.downloads}
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="p-4">
-                {/* Design Info */}
-                <h3 className="font-semibold text-foreground mb-1 line-clamp-1">{design.title}</h3>
-                <p className="text-sm text-muted-foreground mb-2">by {design.designer}</p>
-
-                {/* Rating */}
-                <div className="flex items-center gap-1 mb-3">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm font-medium">{design.rating}</span>
-                  <span className="text-xs text-muted-foreground">({design.downloads})</span>
-                </div>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {design.tags.slice(0, 3).map(tag => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-
-                {/* Price and Actions */}
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-primary">${design.price}</span>
-                  <Button 
-                    size="sm" 
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      addToCart(design.id)
-                    }}
-                    disabled={cartItems.has(design.id)}
-                    className="h-8"
-                  >
-                    {cartItems.has(design.id) ? (
-                      "Added"
-                    ) : (
-                      <>
-                        <ShoppingCart className="h-3 w-3 mr-1" />
-                        Add to Cart
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        {/* Category Filters */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? "default" : "outline"}
+              onClick={() => setSelectedCategory(category)}
+              className="rounded-full"
+            >
+              {category}
+            </Button>
           ))}
         </div>
 
-        {/* No Results */}
-        {filteredDesigns.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎨</div>
-            <h3 className="text-xl font-semibold mb-2">No designs found</h3>
-            <p className="text-muted-foreground mb-4">
-              Try adjusting your search or filter criteria
-            </p>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setSearchQuery("")
-                setSelectedCategory("All")
-              }}
-            >
-              Clear Filters
-            </Button>
+        {/* Error State */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
 
-        {/* Cart Summary */}
-        {cartItems.size > 0 && (
-          <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground p-4 rounded-lg shadow-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <ShoppingCart className="h-4 w-4" />
-              <span className="font-medium">{cartItems.size} item{cartItems.size !== 1 ? 's' : ''} in cart</span>
-            </div>
-            <Button size="sm" variant="secondary" className="w-full">
-              View Cart
-            </Button>
+        {/* Empty State */}
+        {!isLoading && designs.length === 0 && (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground text-lg mb-4">No designs found</p>
+            <p className="text-sm text-muted-foreground">Try adjusting your filters or search query</p>
           </div>
+        )}
+
+        {/* Designs Grid */}
+        {!isLoading && designs.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {designs.map((design) => (
+                <Card key={design.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <CardHeader className="p-0">
+                    <div className="relative aspect-[4/3] bg-muted">
+                      <img
+                        src={design.watermarkedPreviewUrl || "/placeholder.svg"}
+                        alt={design.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/placeholder.svg"
+                        }}
+                      />
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="h-8 w-8 rounded-full"
+                          onClick={() => toggleFavorite(design.id)}
+                        >
+                          <Heart
+                            className={`h-4 w-4 ${
+                              favoriteIds.has(design.id) ? "fill-red-500 text-red-500" : ""
+                            }`}
+                          />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-foreground line-clamp-1">{design.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-1">{design.designer.name}</p>
+                      </div>
+                      <Badge variant="secondary" className="ml-2">
+                        {design.category}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-medium">{design.designer.rating.toFixed(1)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-primary">${design.price}</span>
+                        <Button
+                          size="sm"
+                          onClick={() => addToCart(design.id)}
+                          disabled={cartItems.has(design.id)}
+                        >
+                          {cartItems.has(design.id) ? (
+                            <>
+                              <ShoppingCart className="h-4 w-4 mr-1" />
+                              Added
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingCart className="h-4 w-4 mr-1" />
+                              Add
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <Button
+                  variant="outline"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {pagination.currentPage} of {pagination.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  disabled={currentPage === pagination.totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

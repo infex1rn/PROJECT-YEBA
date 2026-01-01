@@ -1,23 +1,25 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, Upload, User, Mail, Lock, Palette, CheckCircle, AlertCircle } from "lucide-react"
+import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { apiClient } from "@/lib/api-client"
 
 export default function DesignerAuthPage() {
+  const router = useRouter()
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
   
   // Form state
   const [formData, setFormData] = useState({
@@ -29,7 +31,6 @@ export default function DesignerAuthPage() {
     portfolioUrl: "",
     bio: "",
     specialties: [] as string[],
-    profileImage: null as File | null
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -64,7 +65,6 @@ export default function DesignerAuthPage() {
       if (!formData.firstName.trim()) newErrors.firstName = "First name is required"
       if (!formData.lastName.trim()) newErrors.lastName = "Last name is required"
       if (!formData.bio.trim()) newErrors.bio = "Bio is required"
-      if (formData.specialties.length === 0) newErrors.specialties = "Select at least one specialty"
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = "Passwords don't match"
       }
@@ -89,358 +89,251 @@ export default function DesignerAuthPage() {
     if (!validateForm()) return
 
     setIsLoading(true)
+    setErrors({})
+    setSuccessMessage("")
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // For demo - redirect to designer dashboard (will create later)
-      console.log(isLogin ? "Logging in:" : "Signing up:", formData)
-      
-      // TODO: Replace with actual auth logic
-      // After successful auth, redirect to designer dashboard
-      window.location.href = "/designer-dashboard"
-      
-    } catch (error) {
-      setErrors({ submit: "Something went wrong. Please try again." })
+      if (isLogin) {
+        // Login
+        const response = await apiClient.login({
+          email: formData.email,
+          password: formData.password,
+        })
+
+        if (response.success) {
+          setSuccessMessage("Login successful! Redirecting...")
+          setTimeout(() => {
+            router.push("/designer/dashboard")
+          }, 1000)
+        } else {
+          setErrors({ submit: response.error || "Login failed" })
+        }
+      } else {
+        // Register
+        const name = `${formData.firstName} ${formData.lastName}`.trim()
+        const response = await apiClient.registerDesigner({
+          name,
+          email: formData.email,
+          password: formData.password,
+          bio: formData.bio,
+          portfolioLink: formData.portfolioUrl || undefined,
+        })
+
+        if (response.success) {
+          setSuccessMessage("Registration successful! Redirecting...")
+          setTimeout(() => {
+            router.push("/designer/dashboard")
+          }, 1000)
+        } else {
+          setErrors({ submit: response.error || "Registration failed" })
+        }
+      }
+    } catch (error: any) {
+      setErrors({ submit: error.message || "Something went wrong. Please try again." })
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setFormData(prev => ({ ...prev, profileImage: file }))
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 py-12">
-      <div className="container mx-auto px-4">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <Palette className="h-10 w-10 text-primary mr-3" />
-              <h1 className="text-3xl font-bold text-foreground">DeepFold Designer</h1>
-            </div>
-            <p className="text-muted-foreground text-lg">
-              {isLogin ? "Welcome back! Sign in to your designer account" : "Join thousands of creators selling their designs"}
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl shadow-xl">
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-3xl font-bold">
+            {isLogin ? "Designer Login" : "Become a Designer"}
+          </CardTitle>
+          <CardDescription>
+            {isLogin
+              ? "Sign in to access your designer dashboard"
+              : "Join our community and start selling your designs"}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {/* Success Message */}
+          {successMessage && (
+            <Alert className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <AlertDescription className="text-green-800 dark:text-green-200">
+                {successMessage}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Error Message */}
+          {errors.submit && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{errors.submit}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Registration Fields */}
+          {!isLogin && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange("firstName", e.target.value)}
+                    className={errors.firstName ? "border-red-500" : ""}
+                  />
+                  {errors.firstName && <p className="text-xs text-red-500">{errors.firstName}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange("lastName", e.target.value)}
+                    className={errors.lastName ? "border-red-500" : ""}
+                  />
+                  {errors.lastName && <p className="text-xs text-red-500">{errors.lastName}</p>}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Email */}
+          <div className="space-y-2">
+            <Label htmlFor="email">Email *</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              className={errors.email ? "border-red-500" : ""}
+            />
+            {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
           </div>
 
-          <Card className="shadow-xl">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl">
-                {isLogin ? "Sign In" : "Create Designer Account"}
-              </CardTitle>
-              <CardDescription>
-                {isLogin 
-                  ? "Access your designer dashboard and manage your designs" 
-                  : "Start your journey as a designer and showcase your creativity"
-                }
-              </CardDescription>
-            </CardHeader>
+          {/* Password */}
+          <div className="space-y-2">
+            <Label htmlFor="password">Password *</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={(e) => handleInputChange("password", e.target.value)}
+                className={errors.password ? "border-red-500" : ""}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
+          </div>
 
-            <CardContent className="space-y-6">
-              {errors.submit && (
-                <Alert className="border-destructive/50 text-destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{errors.submit}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-6">
-                {!isLogin && (
-                  <>
-                    {/* Name Fields */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name</Label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="firstName"
-                            placeholder="John"
-                            className="pl-10"
-                            value={formData.firstName}
-                            onChange={(e) => handleInputChange("firstName", e.target.value)}
-                          />
-                        </div>
-                        {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input
-                          id="lastName"
-                          placeholder="Doe"
-                          value={formData.lastName}
-                          onChange={(e) => handleInputChange("lastName", e.target.value)}
-                        />
-                        {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
-                      </div>
-                    </div>
-
-                    {/* Profile Image Upload */}
-                    <div className="space-y-2">
-                      <Label>Profile Image (Optional)</Label>
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                          {formData.profileImage ? (
-                            <img 
-                              src={URL.createObjectURL(formData.profileImage)} 
-                              alt="Profile" 
-                              className="w-full h-full rounded-full object-cover"
-                            />
-                          ) : (
-                            <User className="h-6 w-6 text-muted-foreground" />
-                          )}
-                        </div>
-                        <div>
-                          <input
-                            type="file"
-                            id="profileImage"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleFileUpload}
-                          />
-                          <Label htmlFor="profileImage" className="cursor-pointer">
-                            <Button type="button" variant="outline" size="sm" asChild>
-                              <span>
-                                <Upload className="h-4 w-4 mr-2" />
-                                Upload Photo
-                              </span>
-                            </Button>
-                          </Label>
-                          <p className="text-xs text-muted-foreground mt-1">JPG, PNG up to 5MB</p>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Email */}
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="designer@example.com"
-                      className="pl-10"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                    />
-                  </div>
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-
-                {/* Password */}
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder={isLogin ? "Enter your password" : "Create a strong password"}
-                      className="pl-10 pr-10"
-                      value={formData.password}
-                      onChange={(e) => handleInputChange("password", e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                </div>
-
-                {!isLogin && (
-                  <>
-                    {/* Confirm Password */}
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="confirmPassword"
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder="Confirm your password"
-                          className="pl-10 pr-10"
-                          value={formData.confirmPassword}
-                          onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                      {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
-                    </div>
-
-                    {/* Bio */}
-                    <div className="space-y-2">
-                      <Label htmlFor="bio">Bio</Label>
-                      <Textarea
-                        id="bio"
-                        placeholder="Tell us about your design experience and what makes you unique..."
-                        className="min-h-20"
-                        value={formData.bio}
-                        onChange={(e) => handleInputChange("bio", e.target.value)}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        {formData.bio.length}/500 characters
-                      </p>
-                      {errors.bio && <p className="text-sm text-destructive">{errors.bio}</p>}
-                    </div>
-
-                    {/* Portfolio URL */}
-                    <div className="space-y-2">
-                      <Label htmlFor="portfolioUrl">Portfolio URL (Optional)</Label>
-                      <Input
-                        id="portfolioUrl"
-                        type="url"
-                        placeholder="https://yourportfolio.com"
-                        value={formData.portfolioUrl}
-                        onChange={(e) => handleInputChange("portfolioUrl", e.target.value)}
-                      />
-                    </div>
-
-                    {/* Specialties */}
-                    <div className="space-y-3">
-                      <Label>Design Specialties</Label>
-                      <p className="text-sm text-muted-foreground">Select your areas of expertise (choose at least one)</p>
-                      <div className="grid grid-cols-2 gap-3">
-                        {specialtyOptions.map((specialty) => (
-                          <div key={specialty} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={specialty}
-                              checked={formData.specialties.includes(specialty)}
-                              onCheckedChange={() => handleSpecialtyToggle(specialty)}
-                            />
-                            <Label htmlFor={specialty} className="text-sm font-normal cursor-pointer">
-                              {specialty}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.specialties && <p className="text-sm text-destructive">{errors.specialties}</p>}
-                    </div>
-
-                    {/* Terms Agreement */}
-                    <div className="space-y-3">
-                      <div className="flex items-start space-x-2">
-                        <Checkbox
-                          id="terms"
-                          checked={agreedToTerms}
-                          onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                        />
-                        <Label htmlFor="terms" className="text-sm font-normal cursor-pointer leading-relaxed">
-                          I agree to the{" "}
-                          <Link href="/terms" className="text-primary hover:underline">
-                            Terms of Service
-                          </Link>{" "}
-                          and{" "}
-                          <Link href="/privacy" className="text-primary hover:underline">
-                            Privacy Policy
-                          </Link>
-                        </Label>
-                      </div>
-                      {errors.terms && <p className="text-sm text-destructive">{errors.terms}</p>}
-                    </div>
-                  </>
-                )}
-
-                {/* Submit Button */}
-                <Button
+          {/* Confirm Password (Registration only) */}
+          {!isLogin && (
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password *</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                  className={errors.confirmPassword ? "border-red-500" : ""}
+                />
+                <button
                   type="button"
-                  className="w-full h-12 text-lg"
-                  disabled={isLoading}
-                  onClick={handleSubmit}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                      <span>{isLogin ? "Signing In..." : "Creating Account..."}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4" />
-                      <span>{isLogin ? "Sign In" : "Create Designer Account"}</span>
-                    </div>
-                  )}
-                </Button>
-
-                {/* Forgot Password (Login only) */}
-                {isLogin && (
-                  <div className="text-center">
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm text-primary hover:underline"
-                    >
-                      Forgot your password?
-                    </Link>
-                  </div>
-                )}
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
+              {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword}</p>}
+            </div>
+          )}
 
-              <Separator />
-
-              {/* Toggle between Login/Signup */}
-              <div className="text-center space-y-4">
-                <p className="text-muted-foreground">
-                  {isLogin ? "Don't have a designer account?" : "Already have a designer account?"}
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsLogin(!isLogin)
-                    setErrors({})
-                    setFormData({
-                      firstName: "",
-                      lastName: "",
-                      email: "",
-                      password: "",
-                      confirmPassword: "",
-                      portfolioUrl: "",
-                      bio: "",
-                      specialties: [],
-                      profileImage: null
-                    })
-                  }}
-                  className="w-full"
-                >
-                  {isLogin ? "Create New Designer Account" : "Sign In to Existing Account"}
-                </Button>
+          {/* Bio (Registration only) */}
+          {!isLogin && (
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio *</Label>
+              <Textarea
+                id="bio"
+                value={formData.bio}
+                onChange={(e) => handleInputChange("bio", e.target.value)}
+                placeholder="Tell us about yourself and your design experience..."
+                className={`min-h-24 ${errors.bio ? "border-red-500" : ""}`}
+                maxLength={500}
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                {errors.bio && <span className="text-red-500">{errors.bio}</span>}
+                <span className="ml-auto">{formData.bio.length}/500</span>
               </div>
+            </div>
+          )}
 
-              {/* Back to Home */}
-              <div className="text-center pt-4 border-t">
-                <Link
-                  href="/"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  ← Back to Home
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+          {/* Portfolio URL (Registration only) */}
+          {!isLogin && (
+            <div className="space-y-2">
+              <Label htmlFor="portfolioUrl">Portfolio URL (Optional)</Label>
+              <Input
+                id="portfolioUrl"
+                type="url"
+                value={formData.portfolioUrl}
+                onChange={(e) => handleInputChange("portfolioUrl", e.target.value)}
+                placeholder="https://your-portfolio.com"
+              />
+            </div>
+          )}
+
+          {/* Terms (Registration only) */}
+          {!isLogin && (
+            <div className="flex items-start space-x-2">
+              <Checkbox
+                id="terms"
+                checked={agreedToTerms}
+                onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+              />
+              <label htmlFor="terms" className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                I agree to the Terms of Service and Privacy Policy
+              </label>
+            </div>
+          )}
+          {errors.terms && <p className="text-xs text-red-500">{errors.terms}</p>}
+
+          {/* Submit Button */}
+          <Button
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="w-full h-12 text-base font-semibold"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                {isLogin ? "Signing in..." : "Creating account..."}
+              </>
+            ) : (
+              <>{isLogin ? "Sign In" : "Create Designer Account"}</>
+            )}
+          </Button>
+
+          {/* Toggle Login/Register */}
+          <div className="text-center pt-4">
+            <button
+              onClick={() => {
+                setIsLogin(!isLogin)
+                setErrors({})
+                setSuccessMessage("")
+              }}
+              className="text-sm text-primary hover:underline"
+            >
+              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            </button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
