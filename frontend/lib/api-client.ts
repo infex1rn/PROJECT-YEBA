@@ -184,6 +184,98 @@ class ApiClient {
   async getDesigner(id: number) {
     return this.request(`/users/designers/${id}`);
   }
+
+  // Admin endpoints
+  async getDashboardStats() {
+    return this.request('/admin/dashboard/stats');
+  }
+
+  async getAllUsers(params?: {
+    page?: number;
+    limit?: number;
+    role?: string;
+    status?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.role) queryParams.append('role', params.role);
+    if (params?.status) queryParams.append('status', params.status);
+
+    const query = queryParams.toString();
+    return this.request(`/admin/users${query ? `?${query}` : ''}`);
+  }
+
+  async updateUserStatus(userId: number, status: string, reason?: string) {
+    return this.request(`/admin/users/${userId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, reason }),
+    });
+  }
+
+  async getAllDesignsAdmin(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.category) queryParams.append('category', params.category);
+
+    const query = queryParams.toString();
+    return this.request(`/admin/designs${query ? `?${query}` : ''}`);
+  }
+
+  async moderateDesign(designId: number, action: string, notes?: string) {
+    return this.request(`/admin/designs/${designId}/moderate`, {
+      method: 'PUT',
+      body: JSON.stringify({ action, notes }),
+    });
+  }
+
+  async getAllTransactions(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+
+    const query = queryParams.toString();
+    return this.request(`/admin/transactions${query ? `?${query}` : ''}`);
+  }
+
+  async getAllWithdrawals(params?: { page?: number; limit?: number; status?: string }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+
+    const query = queryParams.toString();
+    return this.request(`/admin/withdrawals${query ? `?${query}` : ''}`);
+  }
+
+  async updateWithdrawal(withdrawalId: number, action: string, notes?: string) {
+    return this.request(`/admin/withdrawals/${withdrawalId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ action, notes }),
+    });
+  }
+
+  async getReports(params?: { page?: number; limit?: number; status?: string }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+
+    const query = queryParams.toString();
+    return this.request(`/admin/reports${query ? `?${query}` : ''}`);
+  }
 }
 
 // Export a singleton instance
