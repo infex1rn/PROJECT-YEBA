@@ -56,4 +56,3 @@ wrangler.toml.bak
 # OS
 .DS_Store
 Thumbs.db
-package-lock.json
