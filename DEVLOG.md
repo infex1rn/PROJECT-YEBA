@@ -177,3 +177,9 @@ Append-only record of confirmed repository updates. All entry times use WAT (UTC
 - Bundle commit `d73bd62a3ceed9dd70901c968d759c5f23ea7d1e` was successfully pushed to origin/vsm. `git ls-remote --heads origin vsm` returned the identical SHA; working tree was clean after the push.
 - Remote bundle includes application changes, preserved agent/audit documentation, 32 PNG screenshots and all three requested deliverables under artifacts/screenshots/vsm: index.html, yeba-page-captures.zip and report.json. Credentials, dependencies and compiled application outputs remain excluded.
 - Main was not merged or updated; no pull request, release tag, production migration or deployment was performed. This delivery receipt is committed separately so verified remote success is recorded accurately.
+
+## WAT/2026/10/09/00/14/55 — Place screenshot bundle in repository-root VSM folder
+
+- User clarified that `vsm` must be a folder in the repository. Moved the screenshot bundle from artifacts/screenshots/vsm to root vsm/ using Git rename; updated artifacts/README.md links. Earlier branch naming did not satisfy this folder request.
+- Root vsm/ contains the requested index.html gallery, yeba-page-captures.zip download, report.json browser report and 32 supporting PNGs. Verified every report image reference resolves and the ZIP integrity check passes; gallery-relative references remain valid after the move.
+- Commit/push correction targets the existing origin/vsm branch, preserving main and avoiding its push deployment trigger. No deployment or release is performed.
