@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, Filter, Heart, ShoppingCart, Star, Loader2, Sparkles } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useSiteCategories } from "@/hooks/use-site-categories"
 import { apiClient } from "@/lib/api-client"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-const categories = ["All", "Logos", "Templates", "Print", "UI/UX", "Icons", "Illustrations"]
+
 const sortOptions = [
   { value: "popular", label: "Most Popular" },
   { value: "newest", label: "Newest First" },
@@ -23,7 +24,7 @@ const sortOptions = [
 interface Design {
   id: number;
   title: string;
-  description?: string;
+  description?: string | null;
   category: string;
   price: number;
   watermarkedPreviewUrl: string;
@@ -83,6 +84,8 @@ const cardVariants = {
 }
 
 export default function MarketplacePage() {
+  const { categories: configuredCategories, error: categoryError } = useSiteCategories()
+  const categories = ["All", ...configuredCategories]
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [sortBy, setSortBy] = useState("newest")
@@ -154,6 +157,7 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {categoryError && <p role="alert" className="p-4 text-destructive">{categoryError}</p>}
       {/* Enhanced Header Section with Gradient and Animation */}
       <motion.div 
         className="relative bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-12 px-4 overflow-hidden"

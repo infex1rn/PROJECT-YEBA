@@ -7,6 +7,9 @@ import authRoutes from './routes/auth';
 import designRoutes from './routes/designs';
 import userRoutes from './routes/users';
 import adminRoutes from './routes/admin';
+import settingsRoutes from './routes/settings';
+import reportRoutes from './routes/reports';
+import { enforceMaintenance } from './config/settings';
 
 const app: Express = express();
 
@@ -26,12 +29,17 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
 });
 app.use('/api/', limiter);
+app.use('/api/', (_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
+
+app.use('/api', enforceMaintenance);
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/designs', designRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -54,7 +62,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 const PORT = config.port;
 
-app.listen(PORT, () => {
+if (require.main === module) app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📝 Environment: ${config.nodeEnv}`);
 });

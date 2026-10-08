@@ -1,0 +1,772 @@
+{
+  "capturedAt": "2026-10-08T23:10:04.291Z",
+  "source": "frontend production static export with compiled backend and disposable PostgreSQL; actual empty/database states; no mocked API",
+  "viewports": {
+    "desktop": [
+      1440,
+      1000
+    ],
+    "mobile": [
+      390,
+      844
+    ]
+  },
+  "records": [
+    {
+      "route": "/",
+      "mode": "desktop",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/marketplace/design-1/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/marketplace/design-2/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/marketplace/design-4/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/marketplace/design-3/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/designers/sarah-johnson/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/designers/mike-chen/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/designers/emma-davis/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/designers/james-wilson/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/terms/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/privacy/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/cookies/index.txt?_rsc=1ld0r",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "home-desktop.png"
+    },
+    {
+      "route": "/404",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/404/",
+      "title": "404: This page could not be found.",
+      "file": "404-desktop.png"
+    },
+    {
+      "route": "/about",
+      "mode": "desktop",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/privacy/index.txt?_rsc=lbjk8",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/terms/index.txt?_rsc=lbjk8",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/cookies/index.txt?_rsc=lbjk8",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/about/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "about-desktop.png"
+    },
+    {
+      "route": "/admin/login",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/login/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-login-desktop.png"
+    },
+    {
+      "route": "/contact",
+      "mode": "desktop",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/privacy/index.txt?_rsc=1cref",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/terms/index.txt?_rsc=1cref",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/cookies/index.txt?_rsc=1cref",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/contact/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "contact-desktop.png"
+    },
+    {
+      "route": "/designer-signup",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/designer-signup/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "designer-signup-desktop.png"
+    },
+    {
+      "route": "/m",
+      "mode": "desktop",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/m/designer-signup/index.txt?_rsc=gchlx",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/m/cart/index.txt?_rsc=gchlx",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/m/profile/index.txt?_rsc=gchlx",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/m/",
+      "title": "Mobile - DeepFold | DeepFold",
+      "file": "m-desktop.png"
+    },
+    {
+      "route": "/m/marketplace",
+      "mode": "desktop",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/m/cart/index.txt?_rsc=179vq",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/m/profile/index.txt?_rsc=179vq",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/m/marketplace/",
+      "title": "Mobile - DeepFold | DeepFold",
+      "file": "m-marketplace-desktop.png"
+    },
+    {
+      "route": "/marketplace",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/marketplace/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "marketplace-desktop.png"
+    },
+    {
+      "route": "/offline",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/offline/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "offline-desktop.png"
+    },
+    {
+      "route": "/admin/dashboard",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/dashboard/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-dashboard-desktop.png"
+    },
+    {
+      "route": "/admin/designs",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/designs/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-designs-desktop.png"
+    },
+    {
+      "route": "/admin/reports",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/reports/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-reports-desktop.png"
+    },
+    {
+      "route": "/admin/settings",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/settings/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-settings-desktop.png"
+    },
+    {
+      "route": "/admin/transactions",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/transactions/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-transactions-desktop.png"
+    },
+    {
+      "route": "/admin/users",
+      "mode": "desktop",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/users/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-users-desktop.png"
+    },
+    {
+      "route": "/",
+      "mode": "mobile",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/marketplace/design-1/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/marketplace/design-2/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/marketplace/design-3/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/marketplace/design-4/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/designers/sarah-johnson/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/designers/mike-chen/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/designers/james-wilson/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/designers/emma-davis/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/privacy/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/terms/index.txt?_rsc=1ld0r",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/cookies/index.txt?_rsc=1ld0r",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "home-mobile.png"
+    },
+    {
+      "route": "/404",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/404/",
+      "title": "404: This page could not be found.",
+      "file": "404-mobile.png"
+    },
+    {
+      "route": "/about",
+      "mode": "mobile",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/privacy/index.txt?_rsc=lbjk8",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/cookies/index.txt?_rsc=lbjk8",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/terms/index.txt?_rsc=lbjk8",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/about/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "about-mobile.png"
+    },
+    {
+      "route": "/admin/login",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/login/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-login-mobile.png"
+    },
+    {
+      "route": "/contact",
+      "mode": "mobile",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/privacy/index.txt?_rsc=1cref",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/cookies/index.txt?_rsc=1cref",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/terms/index.txt?_rsc=1cref",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/contact/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "contact-mobile.png"
+    },
+    {
+      "route": "/designer-signup",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/designer-signup/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "designer-signup-mobile.png"
+    },
+    {
+      "route": "/m",
+      "mode": "mobile",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/m/designer-signup/index.txt?_rsc=gchlx",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/m/cart/index.txt?_rsc=gchlx",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/m/profile/index.txt?_rsc=gchlx",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/m/",
+      "title": "Mobile - DeepFold | DeepFold",
+      "file": "m-mobile.png"
+    },
+    {
+      "route": "/m/marketplace",
+      "mode": "mobile",
+      "errors": [],
+      "console": [
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        },
+        {
+          "level": "error",
+          "message": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ],
+      "httpFailures": [
+        {
+          "url": "http://localhost:3000/m/cart/index.txt?_rsc=179vq",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:3000/m/profile/index.txt?_rsc=179vq",
+          "status": 404
+        }
+      ],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/m/marketplace/",
+      "title": "Mobile - DeepFold | DeepFold",
+      "file": "m-marketplace-mobile.png"
+    },
+    {
+      "route": "/marketplace",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/marketplace/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "marketplace-mobile.png"
+    },
+    {
+      "route": "/offline",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/offline/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "offline-mobile.png"
+    },
+    {
+      "route": "/admin/dashboard",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/dashboard/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-dashboard-mobile.png"
+    },
+    {
+      "route": "/admin/designs",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/designs/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-designs-mobile.png"
+    },
+    {
+      "route": "/admin/reports",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/reports/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-reports-mobile.png"
+    },
+    {
+      "route": "/admin/settings",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/settings/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-settings-mobile.png"
+    },
+    {
+      "route": "/admin/transactions",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/transactions/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-transactions-mobile.png"
+    },
+    {
+      "route": "/admin/users",
+      "mode": "mobile",
+      "errors": [],
+      "console": [],
+      "httpFailures": [],
+      "networkFailures": [],
+      "status": 200,
+      "finalUrl": "http://localhost:3000/admin/users/",
+      "title": "DeepFold - Premium Design Marketplace",
+      "file": "admin-users-mobile.png"
+    }
+  ]
+}

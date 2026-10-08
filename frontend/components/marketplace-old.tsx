@@ -126,7 +126,7 @@ export default function MarketplacePage() {
       }
     })
 
-  const toggleFavorite = (designId) => {
+  const toggleFavorite = (designId: number) => {
     setFavoriteIds(prev => {
       const newSet = new Set(prev)
       if (newSet.has(designId)) {

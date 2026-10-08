@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, Filter, Heart, Download, Eye, Star, ShoppingCart, Loader2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useSiteCategories } from "@/hooks/use-site-categories"
 import { apiClient } from "@/lib/api-client"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-const categories = ["All", "Logos", "Templates", "Print", "UI/UX", "Icons", "Illustrations"]
+
 const sortOptions = [
   { value: "popular", label: "Most Popular" },
   { value: "newest", label: "Newest First" },
@@ -22,7 +23,7 @@ const sortOptions = [
 interface Design {
   id: number;
   title: string;
-  description?: string;
+  description?: string | null;
   category: string;
   price: number;
   watermarkedPreviewUrl: string;
@@ -42,6 +43,8 @@ interface Pagination {
 }
 
 export default function MarketplacePage() {
+  const { categories: configuredCategories, error: categoryError } = useSiteCategories()
+  const categories = ["All", ...configuredCategories]
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [sortBy, setSortBy] = useState("newest")
@@ -113,6 +116,7 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {categoryError && <p role="alert" className="p-4 text-destructive">{categoryError}</p>}
       {/* Header Section */}
       <div className="bg-primary/5 py-12 px-4">
         <div className="container mx-auto max-w-6xl">

@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { body, query, validationResult } from 'express-validator';
 import prisma from '../config/database';
+import { getSiteSettings } from '../config/settings';
 import { authenticate, authorize, AuthRequest } from '../middleware/auth';
 
 const router = Router();
@@ -32,7 +33,7 @@ router.get(
       const skip = (page - 1) * limit;
 
       const where: any = {
-        status: 'APPROVED',
+        status: 'APPROVED', archivedAt: null, designer: { user: { status: 'ACTIVE' } },
       };
 
       if (category) {
@@ -104,10 +105,14 @@ router.get(
 // Get single design
 router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const designId = parseInt(req.params.id);
+    const designId = Number(req.params.id);
+    if (!Number.isSafeInteger(designId) || designId <= 0) {
+      res.status(400).json({ success: false, error: 'Invalid design ID' });
+      return;
+    }
 
-    const design = await prisma.design.findUnique({
-      where: { id: designId },
+    const design = await prisma.design.findFirst({
+      where: { id: designId, archivedAt: null, status: 'APPROVED', designer: { user: { status: 'ACTIVE' } } },
       include: {
         designer: {
           include: {
@@ -151,6 +156,30 @@ router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   }
 });
 
+// Owners and administrators can inspect unpublished previews without exposing paid files.
+router.get('/:id/preview', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    res.status(400).json({ success: false, error: 'Invalid design ID' });
+    return;
+  }
+  try {
+    const design = await prisma.design.findFirst({
+      where: { id, archivedAt: null, ...(req.user!.role === 'ADMIN' ? {} : { designer: { userId: req.user!.userId } }) },
+      select: { id: true, title: true, description: true, category: true, price: true,
+        watermarkedPreviewUrl: true, status: true, createdAt: true },
+    });
+    if (!design) {
+      res.status(404).json({ success: false, error: 'Design not found' });
+      return;
+    }
+    res.json({ success: true, design });
+  } catch (error) {
+    console.error('Get private preview error:', error);
+    res.status(503).json({ success: false, error: 'Preview is temporarily unavailable' });
+  }
+});
+
 // Create design (designers only)
 router.post(
   '/',
@@ -185,6 +214,11 @@ router.post(
         return;
       }
 
+      const settings = await getSiteSettings();
+      if (!settings.categories.includes(category)) {
+        res.status(400).json({ success: false, error: 'Select a configured design category' });
+        return;
+      }
       const design = await prisma.design.create({
         data: {
           designerId: designer.id,
@@ -194,7 +228,7 @@ router.post(
           price: parseFloat(price),
           fileUrl,
           watermarkedPreviewUrl,
-          status: 'PENDING',
+          status: settings.designApproval ? 'PENDING' : 'APPROVED',
         },
       });
 
@@ -249,7 +283,7 @@ router.put(
         where: { id: designId },
       });
 
-      if (!design) {
+      if (!design || design.archivedAt) {
         res.status(404).json({ success: false, error: 'Design not found' });
         return;
       }
@@ -304,7 +338,7 @@ router.delete(
         where: { id: designId },
       });
 
-      if (!design) {
+      if (!design || design.archivedAt) {
         res.status(404).json({ success: false, error: 'Design not found' });
         return;
       }
@@ -314,13 +348,13 @@ router.delete(
         return;
       }
 
-      await prisma.design.delete({
-        where: { id: designId },
+      await prisma.design.update({
+        where: { id: designId }, data: { archivedAt: new Date() },
       });
 
       res.json({
         success: true,
-        message: 'Design deleted successfully',
+        message: 'Design archived; purchase records retained',
       });
     } catch (error: any) {
       console.error('Delete design error:', error);

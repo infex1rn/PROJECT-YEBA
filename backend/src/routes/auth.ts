@@ -3,6 +3,9 @@ import { body, validationResult } from 'express-validator';
 import prisma from '../config/database';
 import { hashPassword, comparePassword, generateToken } from '../utils/auth';
 
+import { getSiteSettings } from '../config/settings';
+import { authenticate, AuthRequest } from '../middleware/auth';
+
 const router = Router();
 
 // Register Buyer
@@ -21,6 +24,10 @@ router.post(
         return;
       }
 
+      if (!(await getSiteSettings()).userRegistration) {
+        res.status(403).json({ success: false, error: 'New account registration is currently closed' });
+        return;
+      }
       const { name, email, password } = req.body;
 
       // Check if user exists
@@ -47,7 +54,7 @@ router.post(
         },
       });
 
-      const token = generateToken({ userId: user.id, role: user.role });
+      const token = generateToken({ userId: user.id, role: user.role, tokenVersion: user.tokenVersion });
 
       res.status(201).json({
         success: true,
@@ -84,6 +91,10 @@ router.post(
         return;
       }
 
+      if (!(await getSiteSettings()).userRegistration) {
+        res.status(403).json({ success: false, error: 'New account registration is currently closed' });
+        return;
+      }
       const { name, email, password, bio, portfolioLink } = req.body;
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -111,7 +122,7 @@ router.post(
         },
       });
 
-      const token = generateToken({ userId: user.id, role: user.role });
+      const token = generateToken({ userId: user.id, role: user.role, tokenVersion: user.tokenVersion });
 
       res.status(201).json({
         success: true,
@@ -156,7 +167,7 @@ router.post(
         },
       });
 
-      if (!user) {
+      if (!user || user.status !== 'ACTIVE') {
         res.status(401).json({ success: false, error: 'Invalid credentials' });
         return;
       }
@@ -167,7 +178,7 @@ router.post(
         return;
       }
 
-      const token = generateToken({ userId: user.id, role: user.role });
+      const token = generateToken({ userId: user.id, role: user.role, tokenVersion: user.tokenVersion });
 
       res.json({
         success: true,
@@ -185,5 +196,27 @@ router.post(
     }
   }
 );
+
+router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.userId },
+      select: { id: true, name: true, email: true, role: true, status: true },
+    });
+    if (!user) return res.status(401).json({ success: false, error: 'Session is no longer valid' });
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(503).json({ success: false, error: 'Unable to load session; please retry' });
+  }
+});
+
+router.post('/logout', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    await prisma.user.update({ where: { id: req.user!.userId }, data: { tokenVersion: { increment: 1 } } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(503).json({ success: false, error: 'Unable to revoke session; please retry' });
+  }
+});
 
 export default router;

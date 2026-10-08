@@ -417,11 +417,12 @@ export { handler as GET, handler as POST }
 **Migration Strategy**:
 
 ```bash
-# Using Prisma
-npx prisma migrate dev --name init
-npx prisma generate
-npx prisma db seed
+# From the workspace root, for a fresh database
+pnpm --dir backend db:generate
+pnpm --dir backend db:migrate
 ```
+
+Existing databases require the baseline verification in [backend/README.md](backend/README.md). Do not seed sample production records.
 
 **Migration Files Organization**:
 ```

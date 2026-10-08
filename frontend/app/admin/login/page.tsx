@@ -2,6 +2,7 @@
 
 import type React from "react"
 
+import { apiClient } from "@/lib/api-client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -24,13 +25,14 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     setError("")
 
-    // Simple admin authentication for testing
-    if (username === "admin" && password === "admin") {
-      // Store admin session
-      localStorage.setItem("adminAuth", "true")
-      router.push("/admin/dashboard")
+    const response = await apiClient.login({ email: username, password });
+    if (!response.success) {
+      setError(response.error || "Unable to sign in. Please try again.");
+    } else if (response.data?.user.role !== "ADMIN") {
+      apiClient.clearToken();
+      setError("This account does not have administrator access.");
     } else {
-      setError("Invalid credentials. Use admin/admin for testing.")
+      router.replace("/admin/dashboard");
     }
 
     setIsLoading(false)
@@ -49,11 +51,12 @@ export default function AdminLoginPage() {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Email</Label>
               <Input
                 id="username"
-                type="text"
-                placeholder="Enter username"
+                type="email"
+                autoComplete="username"
+                placeholder="Enter your email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -66,6 +69,7 @@ export default function AdminLoginPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
                   placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -76,6 +80,7 @@ export default function AdminLoginPage() {
                   variant="ghost"
                   size="icon"
                   className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -84,7 +89,7 @@ export default function AdminLoginPage() {
             </div>
 
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" role="alert">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -94,15 +99,6 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground text-center">
-              <strong>Test Credentials:</strong>
-              <br />
-              Username: admin
-              <br />
-              Password: admin
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

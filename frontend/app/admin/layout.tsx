@@ -12,7 +12,7 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const isLoginPage = pathname === "/admin/login"
+  const isLoginPage = pathname.replace(/\/$/, "") === "/admin/login"
 
   if (isLoginPage) {
     return <>{children}</>
@@ -20,11 +20,11 @@ export default function AdminLayout({
 
   return (
     <AdminAuthGuard>
-      <div className="flex h-screen bg-background">
+      <div className="flex h-screen flex-col bg-background md:flex-row">
         <AdminSidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <AdminHeader />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
         </div>
       </div>
     </AdminAuthGuard>

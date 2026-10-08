@@ -2,6 +2,7 @@
 
 import type React from "react"
 
+import { apiClient } from "@/lib/api-client"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
@@ -16,17 +17,19 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   const router = useRouter()
 
   useEffect(() => {
-    const checkAuth = () => {
-      const adminAuth = localStorage.getItem("adminAuth")
-      if (adminAuth === "true") {
-        setIsAuthenticated(true)
+    const controller = new AbortController();
+    const checkAuth = async () => {
+      const response = await apiClient.getSession(controller.signal);
+      if (controller.signal.aborted) return;
+      if (response.success && response.data?.user.role === "ADMIN") {
+        setIsAuthenticated(true);
       } else {
-        setIsAuthenticated(false)
-        router.push("/admin/login")
+        setIsAuthenticated(false);
+        router.replace("/admin/login");
       }
-    }
-
-    checkAuth()
+    };
+    void checkAuth();
+    return () => controller.abort();
   }, [router])
 
   if (isAuthenticated === null) {

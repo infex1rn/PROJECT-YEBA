@@ -15,12 +15,17 @@ model User {
   name         String
   email        String        @unique
   passwordHash String        @map("password_hash")
+  status       UserStatus    @default(ACTIVE)
+  verified     Boolean       @default(false)
+  tokenVersion Int           @default(0) @map("token_version")
   role         Role
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
   
   designer         Designer?
   buyer            Buyer?
+  filedReports     Report[]      @relation("ReportAuthor")
+  moderatedReports Report[]      @relation("ReportModerator")
   sentMessages     Message[]     @relation("SentMessages")
   receivedMessages Message[]     @relation("ReceivedMessages")
 
@@ -67,6 +72,7 @@ model Design {
   fileUrl               String       @map("file_url")
   watermarkedPreviewUrl String       @map("watermarked_preview_url")
   status                DesignStatus @default(PENDING)
+  archivedAt            DateTime?    @map("archived_at")
   createdAt             DateTime     @default(now()) @map("created_at")
   
   designer     Designer      @relation(fields: [designerId], references: [id], onDelete: Cascade)
@@ -83,13 +89,15 @@ model Transaction {
   id            Int           @id @default(autoincrement())
   buyerId       Int           @map("buyer_id")
   designId      Int           @map("design_id")
+  designTitle   String        @map("design_title")
+  previewUrl    String        @map("preview_url")
   amount        Float
   paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
   paymentMethod PaymentMethod @map("payment_method")
   createdAt     DateTime      @default(now()) @map("created_at")
   
-  buyer  Buyer  @relation(fields: [buyerId], references: [id], onDelete: Cascade)
-  design Design @relation(fields: [designId], references: [id], onDelete: Cascade)
+  buyer  Buyer  @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  design Design @relation(fields: [designId], references: [id], onDelete: Restrict)
 
   @@unique([buyerId, designId])
   @@index([buyerId])
@@ -135,9 +143,10 @@ model Withdrawal {
   designerId Int              @map("designer_id")
   amount     Float
   status     WithdrawalStatus @default(PENDING)
+  processedAt DateTime?       @map("processed_at")
   createdAt  DateTime         @default(now()) @map("created_at")
   
-  designer Designer @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  designer Designer @relation(fields: [designerId], references: [id], onDelete: Restrict)
 
   @@index([designerId])
   @@index([status])
@@ -174,4 +183,59 @@ enum WithdrawalStatus {
   APPROVED
   REJECTED
   COMPLETED
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+model Report {
+  id           Int          @id @default(autoincrement())
+  reporterId   Int          @map("reporter_id")
+  type         ReportType
+  subjectId    Int          @map("subject_id")
+  reason       String
+  description  String
+  status       ReportStatus @default(PENDING)
+  resolution   String?
+  moderatorId  Int?         @map("moderator_id")
+  resolvedAt   DateTime?    @map("resolved_at")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  reporter User  @relation("ReportAuthor", fields: [reporterId], references: [id], onDelete: Restrict)
+  moderator User? @relation("ReportModerator", fields: [moderatorId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@index([type, subjectId])
+  @@map("reports")
+}
+
+model SiteSettings {
+  id               Int      @id
+  version          Int      @default(0)
+  maintenanceMode  Boolean  @default(false) @map("maintenance_mode")
+  userRegistration Boolean  @default(true) @map("user_registration")
+  designApproval   Boolean  @default(true) @map("design_approval")
+  categories       String[]
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+enum ReportType {
+  DESIGN
+  USER
+  REVIEW
+  MESSAGE
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
+  FLAGGED
 }

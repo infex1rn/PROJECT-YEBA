@@ -110,70 +110,43 @@ PROJECT-YEBA/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
-- npm, yarn, or pnpm
-- PostgreSQL database (for production)
+
+Use Node.js, pnpm 9.15.0 and PostgreSQL. Run application commands from the workspace root.
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/infex1rn/PROJECT-YEBA.git
-   cd PROJECT-YEBA
-   ```
+```bash
+pnpm install --frozen-lockfile
+cp backend/.env.example backend/.env
+openssl rand -base64 48
+```
 
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   # or
-   npm install
-   # or
-   yarn install
-   ```
+Set the backend `DATABASE_URL` and the generated random `JWT_SECRET` in `backend/.env`.
+Never use an example signing key. Set `NEXT_PUBLIC_API_URL=http://localhost:5000/api`
+in `frontend/.env.local` for local development.
 
-3. **Set up environment variables**
-   Create a `.env.local` file in the root directory:
-   ```env
-   # Database
-   DATABASE_URL=postgresql://user:password@localhost:5432/yeba_db
-   
-   # Authentication
-   JWT_SECRET=your-secret-key-here
-   
-   # Payment Gateways
-   STRIPE_SECRET_KEY=sk_test_...
-   STRIPE_PUBLISHABLE_KEY=pk_test_...
-   PAYPAL_CLIENT_ID=your-paypal-client-id
-   PAYSTACK_SECRET_KEY=sk_test_...
-   
-   # File Storage
-   CLOUDINARY_URL=cloudinary://...
-   # or
-   AWS_S3_BUCKET=your-bucket-name
-   AWS_ACCESS_KEY_ID=...
-   AWS_SECRET_ACCESS_KEY=...
-   ```
+For a fresh database:
 
-4. **Set up the database**
-   ```bash
-   # Run migration scripts in order
-   psql -U postgres -d yeba_db -f scripts/001_create_users_table.sql
-   psql -U postgres -d yeba_db -f scripts/002_create_designers_table.sql
-   # ... run all scripts in order
-   psql -U postgres -d yeba_db -f scripts/010_seed_sample_data.sql
-   ```
+```bash
+pnpm --dir backend db:generate
+pnpm --dir backend db:migrate
+```
 
-5. **Run the development server**
-   ```bash
-   pnpm dev
-   # or
-   npm run dev
-   # or
-   yarn dev
-   ```
+For an existing database, follow the verified-baseline procedure in
+[backend/README.md](backend/README.md). The old SQL scripts and sample seed are
+incompatible with the canonical Prisma schema and must not be used for setup.
 
-6. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+Run these in separate terminals:
+
+```bash
+pnpm --dir backend dev
+pnpm --dir frontend dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Cloudflare R2 and Paystack are the
+selected storage and payment providers. Their live integrations are not yet available;
+refund and payout approval return explicit errors without changing financial records.
+Credentials belong on the server and must never be added to public frontend variables.
 
 ### Build for Production
 

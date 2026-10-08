@@ -7,7 +7,15 @@ const router = Router();
 // Get user profile
 router.get('/:id', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.params.id);
+    const userId = Number(req.params.id);
+    if (!Number.isSafeInteger(userId) || userId <= 0) {
+      res.status(400).json({ success: false, error: 'Invalid user ID' });
+      return;
+    }
+    if (req.user!.userId !== userId && req.user!.role !== 'ADMIN') {
+      res.status(403).json({ success: false, error: 'Forbidden' });
+      return;
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -38,21 +46,24 @@ router.get('/:id', authenticate, async (req: AuthRequest, res: Response): Promis
 // Get designer profile
 router.get('/designers/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const designerId = parseInt(req.params.id);
+    const designerId = Number(req.params.id);
+    if (!Number.isSafeInteger(designerId) || designerId <= 0) {
+      res.status(400).json({ success: false, error: 'Invalid designer ID' });
+      return;
+    }
 
-    const designer = await prisma.designer.findUnique({
-      where: { id: designerId },
+    const designer = await prisma.designer.findFirst({
+      where: { id: designerId, user: { status: 'ACTIVE' } },
       include: {
         user: {
           select: {
             name: true,
-            email: true,
             createdAt: true,
           },
         },
         designs: {
           where: {
-            status: 'APPROVED',
+            status: 'APPROVED', archivedAt: null,
           },
           select: {
             id: true,

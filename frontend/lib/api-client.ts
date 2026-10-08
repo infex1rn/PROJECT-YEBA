@@ -1,13 +1,34 @@
+import type { AdminPayload, AdminUser, AdminDesign, AdminTransaction, AdminWithdrawal, AdminReport, SiteSettings } from './admin-types';
+
 // API client for backend communication
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
   errors?: any[];
 }
+
+export interface SessionUser { id: number; name: string; email: string; role: 'BUYER' | 'DESIGNER' | 'ADMIN'; }
+export interface MarketplaceDesign {
+  id: number; title: string; description: string | null; category: string; price: number;
+  watermarkedPreviewUrl: string; createdAt: string;
+  designer: { id: number; name: string; rating: number };
+}
+export interface DesignListPayload {
+  success: boolean; designs: MarketplaceDesign[];
+  pagination: { currentPage: number; totalPages: number; totalItems: number; itemsPerPage: number };
+}
+export interface DashboardStatsPayload {
+  success: boolean;
+  data: { totalUsers: number; totalDesigners: number; totalBuyers: number; totalDesigns: number;
+    approvedDesigns: number; pendingDesigns: number; rejectedDesigns: number; totalRevenue: number;
+    totalTransactions: number; pendingWithdrawals: { amount: number; count: number };
+    monthlyUsers: { month: string; users: number }[]; monthlySales: { month: string; sales: number }[] };
+}
+interface AuthPayload { success: boolean; user: SessionUser; token: string; }
 
 class ApiClient {
   private baseURL: string;
@@ -43,27 +64,34 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
+    const headers = new Headers(options.headers);
+    headers.set('Content-Type', 'application/json');
 
     if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+      headers.set('Authorization', `Bearer ${this.token}`);
     }
 
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    if (options.signal?.aborted) controller.abort();
+    options.signal?.addEventListener('abort', abort, { once: true });
+    const timeout = setTimeout(abort, 15000);
     try {
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         ...options,
         headers,
+        signal: controller.signal,
       });
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (typeof data !== 'object' || data === null || typeof data.success !== 'boolean') {
+        return { success: false, error: 'The server returned an unexpected response. Please reload and retry.' };
+      }
+      if (!response.ok || !data.success) {
         return {
           success: false,
-          error: data.error || data.message || 'Request failed',
+          error: typeof data.error === 'string' ? data.error : typeof data.message === 'string' ? data.message : 'Request failed',
           errors: data.errors,
         };
       }
@@ -73,11 +101,13 @@ class ApiClient {
         data,
       };
     } catch (error: any) {
-      console.error('API request failed:', error);
       return {
         success: false,
-        error: error.message || 'Network error',
+        error: controller.signal.aborted ? 'Request cancelled or timed out. Please retry.' : 'Unable to reach the server. Please retry.',
       };
+    } finally {
+      clearTimeout(timeout);
+      options.signal?.removeEventListener('abort', abort);
     }
   }
 
@@ -103,7 +133,7 @@ class ApiClient {
   }
 
   async login(data: { email: string; password: string }) {
-    const response = await this.request('/auth/login', {
+    const response = await this.request<AuthPayload>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -115,8 +145,14 @@ class ApiClient {
     return response;
   }
 
+  async getSession(signal?: AbortSignal) {
+    return this.request<{ success: boolean; user: SessionUser }>('/auth/me', { signal, cache: 'no-store' });
+  }
+
   async logout() {
-    this.clearToken();
+    const result = await this.request('/auth/logout', { method: 'POST' });
+    if (result.success) this.clearToken();
+    return result;
   }
 
   // Design endpoints
@@ -126,7 +162,7 @@ class ApiClient {
     category?: string;
     search?: string;
     sortBy?: string;
-  }) {
+  }, signal?: AbortSignal) {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -135,7 +171,7 @@ class ApiClient {
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
 
     const query = queryParams.toString();
-    return this.request(`/designs${query ? `?${query}` : ''}`);
+    return this.request<DesignListPayload>(`/designs${query ? `?${query}` : ''}`, { signal });
   }
 
   async getDesign(id: number) {
@@ -187,7 +223,7 @@ class ApiClient {
 
   // Admin endpoints
   async getDashboardStats() {
-    return this.request('/admin/stats');
+    return this.request<DashboardStatsPayload>('/admin/stats');
   }
 
   async getAllUsers(params?: {
@@ -195,15 +231,17 @@ class ApiClient {
     limit?: number;
     role?: string;
     status?: string;
-  }) {
+    search?: string;
+  }, signal?: AbortSignal) {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.role) queryParams.append('role', params.role);
     if (params?.status) queryParams.append('status', params.status);
 
+    if (params?.search) queryParams.append('search', params.search);
     const query = queryParams.toString();
-    return this.request(`/admin/users${query ? `?${query}` : ''}`);
+    return this.request<AdminPayload<AdminUser, 'users'>>(`/admin/users${query ? `?${query}` : ''}`, { signal });
   }
 
   async updateUserStatus(userId: number, status: string, reason?: string) {
@@ -218,15 +256,17 @@ class ApiClient {
     limit?: number;
     status?: string;
     category?: string;
-  }) {
+    search?: string;
+  }, signal?: AbortSignal) {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.status) queryParams.append('status', params.status);
     if (params?.category) queryParams.append('category', params.category);
 
+    if (params?.search) queryParams.append('search', params.search);
     const query = queryParams.toString();
-    return this.request(`/admin/designs${query ? `?${query}` : ''}`);
+    return this.request<AdminPayload<AdminDesign, 'designs'>>(`/admin/designs${query ? `?${query}` : ''}`, { signal });
   }
 
   async moderateDesign(designId: number, status: string, reason?: string) {
@@ -236,7 +276,7 @@ class ApiClient {
     });
   }
 
-  async deleteDesign(designId: number) {
+  async deleteDesignAdmin(designId: number) {
     return this.request(`/admin/designs/${designId}`, {
       method: 'DELETE',
     });
@@ -246,24 +286,24 @@ class ApiClient {
     page?: number;
     limit?: number;
     status?: string;
-  }) {
+  }, signal?: AbortSignal) {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.status) queryParams.append('status', params.status);
 
     const query = queryParams.toString();
-    return this.request(`/admin/transactions${query ? `?${query}` : ''}`);
+    return this.request<AdminPayload<AdminTransaction, 'transactions'>>(`/admin/transactions${query ? `?${query}` : ''}`, { signal });
   }
 
-  async getAllWithdrawals(params?: { page?: number; limit?: number; status?: string }) {
+  async getAllWithdrawals(params?: { page?: number; limit?: number; status?: string }, signal?: AbortSignal) {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.status) queryParams.append('status', params.status);
 
     const query = queryParams.toString();
-    return this.request(`/admin/withdrawals${query ? `?${query}` : ''}`);
+    return this.request<AdminPayload<AdminWithdrawal, 'withdrawals'>>(`/admin/withdrawals${query ? `?${query}` : ''}`, { signal });
   }
 
   async processWithdrawal(withdrawalId: number, status: string, reason?: string) {
@@ -286,15 +326,34 @@ class ApiClient {
     });
   }
 
-  async getReports(params?: { page?: number; limit?: number; status?: string }) {
-    const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.status) queryParams.append('status', params.status);
-
-    const query = queryParams.toString();
-    return this.request(`/admin/reports${query ? `?${query}` : ''}`);
+  async getReports(params?: { page?: number; limit?: number; status?: string }, signal?: AbortSignal) {
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.status) query.set('status', params.status);
+    return this.request<AdminPayload<AdminReport, 'reports'>>(`/admin/reports?${query}`, { signal });
   }
+
+  async verifyUser(id: number, verified: boolean) {
+    return this.request(`/admin/users/${id}/verification`, { method: 'PUT', body: JSON.stringify({ verified }) });
+  }
+
+  async decideReport(id: number, data: { status: string; expectedStatus: string; resolution: string }) {
+    return this.request(`/admin/reports/${id}/status`, { method: 'PUT', body: JSON.stringify(data) });
+  }
+
+  async getSiteSettings(signal?: AbortSignal) {
+    return this.request<{ success: boolean; data: SiteSettings }>('/settings', { signal, cache: 'no-store' });
+  }
+
+  async getAdminSettings(signal?: AbortSignal) {
+    return this.request<{ success: boolean; data: SiteSettings }>('/admin/settings', { signal, cache: 'no-store' });
+  }
+
+  async updateSettings(settings: Omit<SiteSettings, 'id' | 'updatedAt'>) {
+    return this.request('/admin/settings', { method: 'PUT', body: JSON.stringify(settings) });
+  }
+
 }
 
 // Export a singleton instance

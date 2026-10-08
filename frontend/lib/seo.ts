@@ -54,7 +54,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
         },
       ],
       locale: 'en_US',
-      type,
+      type: type === 'product' ? 'website' : type,
       publishedTime,
       modifiedTime,
     },

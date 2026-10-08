@@ -4,7 +4,7 @@
  */
 
 import { indexedDB } from './indexeddb';
-import { apiClient } from './api-client';
+import { apiClient, MarketplaceDesign } from './api-client';
 
 interface SyncStatus {
   isOnline: boolean;
@@ -127,22 +127,19 @@ class SyncManager {
    * Sync designs from backend to IndexedDB
    */
   private async syncDesigns(): Promise<void> {
-    try {
-      const response = await apiClient.getDesigns({ page: 1, limit: 100 });
-      
-      if (response.designs) {
-        // Clear existing designs
-        await indexedDB.clear('designs');
-
-        // Add new designs
-        for (const design of response.designs) {
-          await indexedDB.designs.add(design);
-        }
+    const designs = new Map<number, MarketplaceDesign>();
+    let page = 1;
+    let totalPages = 1;
+    do {
+      const response = await apiClient.getDesigns({ page, limit: 100 });
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Unable to synchronize the design catalog');
       }
-    } catch (error) {
-      console.error('Failed to sync designs:', error);
-      throw error;
-    }
+      for (const design of response.data.designs) designs.set(design.id, design);
+      totalPages = response.data.pagination.totalPages;
+      page += 1;
+    } while (page <= totalPages);
+    await indexedDB.replaceDesigns([...designs.values()]);
   }
 
   /**

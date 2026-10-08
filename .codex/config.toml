@@ -1,0 +1,6 @@
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[mcp_servers.graphify]
+url = "https://api.graphify.com/v1/mcp"
+bearer_token_env_var = "GRAPHIFY_MCP_TOKEN"

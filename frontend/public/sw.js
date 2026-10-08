@@ -1,9 +1,8 @@
 // Service Worker for Progressive Web App
 // Handles offline caching and background sync
 
-const CACHE_NAME = 'deepfold-v1';
-const STATIC_CACHE = 'deepfold-static-v1';
-const API_CACHE = 'deepfold-api-v1';
+const CACHE_NAME = 'deepfold-v2';
+const STATIC_CACHE = 'deepfold-static-v2';
 
 // Assets to cache on install
 const STATIC_ASSETS = [
@@ -28,7 +27,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME && name !== STATIC_CACHE && name !== API_CACHE)
+          .filter((name) => name.startsWith('deepfold-') && name !== CACHE_NAME && name !== STATIC_CACHE)
           .map((name) => caches.delete(name))
       );
     })
@@ -41,32 +40,15 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // API requests - network first, cache fallback
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Clone and cache successful responses
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(API_CACHE).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Return cached response if network fails
-          return caches.match(request).then((cached) => {
-            return cached || new Response(JSON.stringify({ error: 'Offline' }), {
-              status: 503,
-              headers: { 'Content-Type': 'application/json' },
-            });
-          });
-        })
-    );
+  // Only public same-origin GET resources may enter a shared cache.
+  if (request.method !== 'GET' || url.origin !== self.location.origin ||
+      url.pathname.startsWith('/api/') || request.headers.has('Authorization')) {
     return;
   }
+  const publicPages = new Set(['/', '/marketplace', '/m', '/m/marketplace', '/offline']);
+  const path = url.pathname.replace(/\/$/, '') || '/';
+  const staticAsset = url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/public/');
+  if (!staticAsset && !publicPages.has(path)) return;
 
   // Static assets - cache first, network fallback
   if (url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/public/')) {
@@ -75,7 +57,7 @@ self.addEventListener('fetch', (event) => {
         return cached || fetch(request).then((response) => {
           const responseClone = response.clone();
           caches.open(STATIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
+            if (response.ok && !/no-store|private/i.test(response.headers.get('Cache-Control') || '')) cache.put(request, responseClone);
           });
           return response;
         });
@@ -90,7 +72,7 @@ self.addEventListener('fetch', (event) => {
       .then((response) => {
         const responseClone = response.clone();
         caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, responseClone);
+          if (response.ok && !/no-store|private/i.test(response.headers.get('Cache-Control') || '')) cache.put(request, responseClone);
         });
         return response;
       })

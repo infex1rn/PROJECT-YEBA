@@ -1,6 +1,8 @@
+import type { MarketplaceDesign as Design } from './api-client';
+
 /**
  * IndexedDB Storage Utility
- * Provides offline data persistence with automatic sync
+ * Stores offline data and retains changes awaiting server acknowledgment
  */
 
 const DB_NAME = 'deepfold-db';
@@ -16,18 +18,6 @@ const STORES = {
   SETTINGS: 'settings',
   SYNC_QUEUE: 'sync_queue',
 } as const;
-
-interface Design {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  images: string[];
-  designer: any;
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface SyncQueueItem {
   id: string;
@@ -48,12 +38,12 @@ class IndexedDBManager {
     if (this.db) return this.db;
 
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      const request = globalThis.indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
-        resolve(this.db);
+        resolve(request.result);
       };
 
       request.onupgradeneeded = (event: any) => {
@@ -223,33 +213,36 @@ class IndexedDBManager {
   async processSyncQueue(): Promise<void> {
     const queue = await this.getAll<SyncQueueItem>(STORES.SYNC_QUEUE);
     
-    for (const item of queue) {
-      try {
-        // Process sync item (implement actual API sync logic)
-        console.log('Processing sync:', item);
-        
-        // On success, remove from queue
-        await this.delete(STORES.SYNC_QUEUE, item.id);
-      } catch (error) {
-        // Increment retries
-        item.retries += 1;
-        if (item.retries > 3) {
-          // Remove after 3 failed attempts
-          await this.delete(STORES.SYNC_QUEUE, item.id);
-        } else {
-          await this.update(STORES.SYNC_QUEUE, item);
-        }
-      }
+    if (queue.length > 0) {
+      throw new Error('Offline changes remain queued: authenticated server synchronization is not available');
     }
+  }
+
+  async replaceDesigns(designs: Design[]): Promise<void> {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORES.DESIGNS, 'readwrite');
+      transaction.oncomplete = () => resolve();
+      transaction.onabort = () => reject(transaction.error || new Error('Design cache update aborted'));
+      transaction.onerror = () => reject(transaction.error);
+      const store = transaction.objectStore(STORES.DESIGNS);
+      try {
+        store.clear();
+        for (const design of designs) store.put(design);
+      } catch (error) {
+        transaction.abort();
+        reject(error);
+      }
+    });
   }
 
   // Design-specific methods
   designs = {
     add: (design: Design) => this.add(STORES.DESIGNS, design),
-    get: (id: string) => this.get<Design>(STORES.DESIGNS, id),
+    get: (id: number) => this.get<Design>(STORES.DESIGNS, id),
     getAll: () => this.getAll<Design>(STORES.DESIGNS),
     update: (design: Design) => this.update(STORES.DESIGNS, design),
-    delete: (id: string) => this.delete(STORES.DESIGNS, id),
+    delete: (id: number) => this.delete(STORES.DESIGNS, id),
     getByCategory: (category: string) => this.getByIndex<Design>(STORES.DESIGNS, 'category', category),
   };
 

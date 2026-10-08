@@ -9,9 +9,9 @@ export function AdminHeader() {
 
   return (
     <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-full items-center justify-between px-6">
+      <div className="flex h-full items-center justify-between gap-2 px-4 sm:px-6">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">DeepFold Admin Dashboard</h1>
+          <h1 className="text-base font-semibold sm:text-xl text-foreground">DeepFold Admin Dashboard</h1>
         </div>
 
         <div className="flex items-center space-x-2">
