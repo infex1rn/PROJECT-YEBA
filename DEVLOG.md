@@ -171,3 +171,9 @@ Append-only record of confirmed repository updates. All entry times use WAT (UTC
 - Verified the gallery, ZIP and report are byte-for-byte copies of the capture outputs and the ZIP integrity check passes. Verified all 172 installed skill lock hashes without modifying upstream skill content or licenses.
 - Full staged `git diff --check` reports existing upstream skill Markdown trailing whitespace and generated Prisma migration EOF blank lines. These files are preserved exactly for upstream hashes and applied migration checksums; no passing full whitespace check is claimed. Earlier unstaged whitespace checks did not cover then-untracked files. Application source has no reported whitespace failures.
 - Secret-pattern checks and staged path exclusions are verified before commit. Push targets origin/vsm, preserving main and avoiding its push deployment trigger.
+
+## WAT/2026/10/09/00/14/34 — Confirm VSM bundle commit and remote delivery
+
+- Bundle commit `d73bd62a3ceed9dd70901c968d759c5f23ea7d1e` was successfully pushed to origin/vsm. `git ls-remote --heads origin vsm` returned the identical SHA; working tree was clean after the push.
+- Remote bundle includes application changes, preserved agent/audit documentation, 32 PNG screenshots and all three requested deliverables under artifacts/screenshots/vsm: index.html, yeba-page-captures.zip and report.json. Credentials, dependencies and compiled application outputs remain excluded.
+- Main was not merged or updated; no pull request, release tag, production migration or deployment was performed. This delivery receipt is committed separately so verified remote success is recorded accurately.
